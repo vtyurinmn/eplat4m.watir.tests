@@ -6,6 +6,7 @@ module Helpers
   ## ОБЩИЕ МЕТОДЫ
 
   def browser(browser)
+      Watir.default_timeout = 90
       @browser = Watir::Browser.new(browser)
   end
 
@@ -35,11 +36,6 @@ module Helpers
   # делаем клевые фоточки
   def make_screenshot(filename)
     @browser.screenshot.save ("../shots/#{filename}.png")
-  end
-  
-  # ожидаем таймаут, без него никак =(
-  def pender(time)
-    @browser.wait(time)
   end
 
   ## МЕТОДЫ ДЛЯ РАБОТЫ С РЕШЕНИЯМИ
@@ -105,16 +101,16 @@ module Helpers
 
   # добавление свойства "Текущая дата" для поля приложения типа "Дата", переделать под разные значения
   def set_сurrent_date(field_index)
-    @browser.link(class: "link-button-grid", title: "Настройки", index: field_index).click
-    @browser.select_list(:id, "defaultValue").select("Текущая дата")
-    @browser.button(value: "Ok").click
+    @browser.link(class: 'link-button-grid', title: 'Настройки', index: field_index).click
+    @browser.select_list(:id, 'defaultValue').when_present.select('Текущая дата')
+    @browser.button(value: 'Ok').click
   end
 
   ## МЕТОДЫ ДЛЯ РАБОТЫ С ПРОВАЙДЕРАМИ ДАННЫХ
 
   # создание нового провайдера
   def add_provider(provider_name)
-    @browser.button(title: 'Создать провайдер данных').when_present.click
+    @browser.button(css: '.btn.btn-panel.btn-xs', index: 2).click
     @browser.text_field(id: 'name').when_present.set(provider_name)
     @browser.button(value: 'Создать').click
   end
@@ -138,18 +134,16 @@ module Helpers
   end
 
   #	выбор полей из приложений
-  def choose_field(field_name)
+  def choose_field(field_index, field_name)
     @browser.button(value: 'Добавить поле').when_present.click
-    @browser.div(id: /s2id_autogen/).when_present.click
+    @browser.div(id: /s2id_autogen/, index: field_index).when_present.click
     @browser.text_field(class: 'select2-input select2-focused').when_present.set(field_name)
     @browser.span(class: 'select2-match').when_present.click
   end
 
   #	выбор типа функции для поля
   def select_func(func_index, func_value)
-    @browser.select_list(data_bind: /aggregateTypes/, index: func_index).option(value: func_value).select
-    @browser.button(value: 'Добавить поле').when_present.click
-    @browser.div(id: /s2id_autogen/, index: 1).when_present.click
+    @browser.select_list(data_bind: /aggregateTypes/, index: func_index).select(func_value)
   end
 
   # добавление группы состояний
